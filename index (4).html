@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>命星診断AI ― あなたの"今"を、星が診断する。</title>
+<meta name="description" content="生年月日といまの悩みを伝えると、AIが星の巡りを読み解き、診断結果として言葉を届ける。都度100円/月額390円から選べる、体験型のAI占い「命星診断AI」。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF8F1;
+    --paper-2:#F2EFE4;
+    --ink:#1B1E2E;
+    --ink-soft:#5B5E70;
+    --ink-faint:#8B8D9C;
+    --line:rgba(27,30,46,0.14);
+    --red:#B23A2E;
+    --red-soft:rgba(178,58,46,0.07);
+    --brass:#9C7C3E;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-weight:400;
+    line-height:1.9;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{font-family:'Shippori Mincho', serif; margin:0; letter-spacing:.02em;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 28px;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;letter-spacing:.22em;color:var(--red);
+    text-transform:uppercase;display:inline-block;margin-bottom:16px;
+  }
+  hr.rule{border:none;border-top:1px solid var(--line);margin:0;}
+
+  /* ---------- Header ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(250,248,241,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;}
+  .brand{font-family:'Shippori Mincho',serif;font-size:18px;letter-spacing:.06em;display:flex;align-items:baseline;gap:6px;}
+  .brand .mark{color:var(--red);}
+  nav a{font-size:13px;letter-spacing:.04em;color:var(--ink-soft);text-decoration:none;margin-left:30px;}
+  nav a:hover{color:var(--ink);}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:76px 0 100px;}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;}
+  @media (max-width:860px){.hero .wrap{grid-template-columns:1fr;} .hero-chart{order:-1;max-width:320px;margin:0 auto;}}
+  .hero h1{font-size:clamp(30px,4.4vw,46px);font-weight:800;line-height:1.6;}
+  .hero h1 .accent{color:var(--red);}
+  .hero p.lead{margin-top:24px;color:var(--ink-soft);font-size:15.5px;max-width:440px;}
+  .cta-row{margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;font-size:14px;letter-spacing:.04em;text-decoration:none;border:1px solid var(--ink);transition:all .2s ease;}
+  .btn-primary{background:var(--ink);color:var(--paper);}
+  .btn-primary:hover{background:var(--red);border-color:var(--red);}
+  .btn-ghost{border-color:var(--line);color:var(--ink-soft);}
+  .btn-ghost:hover{border-color:var(--ink);color:var(--ink);}
+  .price-note{margin-top:20px;font-size:12.5px;color:var(--ink-faint);}
+  .price-note .mono{color:var(--red);font-weight:600;}
+
+  /* ---------- chart / stamp signature ---------- */
+  .hero-chart{position:relative;}
+  .chart-ring{stroke:var(--ink);stroke-width:1;fill:none;opacity:.55;}
+  .chart-ring-dash{stroke:var(--brass);stroke-width:1;fill:none;stroke-dasharray:2 5;opacity:.8;}
+  .chart-tick{stroke:var(--ink);stroke-width:1;opacity:.4;}
+  .chart-aspect{stroke:var(--brass);stroke-width:.8;opacity:.55;}
+  .chart-node{fill:var(--ink);opacity:.7;}
+  .stamp-outer{fill:none;stroke:var(--red);stroke-width:2.5;}
+  .stamp-inner{fill:none;stroke:var(--red);stroke-width:1;}
+  .stamp-outer.dup, .stamp-inner.dup{opacity:.35;}
+  .stamp-kanji{font-family:'Shippori Mincho',serif;fill:var(--red);font-weight:700;}
+
+  /* ---------- Section shared ---------- */
+  section{padding:96px 0;}
+  .section-head{max-width:600px;margin-bottom:56px;}
+  .section-head h2{font-size:clamp(24px,3vw,32px);font-weight:600;}
+  .section-head p{color:var(--ink-soft);margin-top:14px;font-size:14.5px;}
+
+  /* ---------- How it works ---------- */
+  .how{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-2);}
+  .steps{display:flex;flex-direction:column;}
+  .step{display:grid;grid-template-columns:110px 1fr;gap:28px;padding:34px 0;border-top:1px solid var(--line);}
+  .step:last-child{border-bottom:1px solid var(--line);}
+  .step .num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--red);letter-spacing:.05em;}
+  .step h3{font-size:18px;font-weight:600;margin-bottom:10px;}
+  .step p{color:var(--ink-soft);font-size:14.5px;max-width:520px;}
+
+  /* ---------- Preview ---------- */
+  .preview .wrap{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;}
+  @media (max-width:900px){.preview .wrap{grid-template-columns:1fr;}}
+  .intake{border:1px solid var(--line);background:var(--paper-2);padding:30px 32px;}
+  .intake .field{border-bottom:1px dashed var(--ink-faint);padding:14px 0;font-size:14px;}
+  .intake .field label{display:block;font-size:11px;color:var(--ink-faint);letter-spacing:.08em;margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
+  .result-card{border:1px solid var(--line);padding:30px 32px;position:relative;}
+  .result-card .id{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);letter-spacing:.06em;margin-bottom:18px;}
+  .msg-user{color:var(--ink-soft);font-size:14px;padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:20px;}
+  .msg-ai{display:flex;gap:14px;}
+  .msg-ai .bar{width:2px;background:var(--red);flex-shrink:0;}
+  .msg-ai p{color:var(--red);font-size:14.5px;line-height:1.85;font-weight:500;}
+  .msg-ai .tag{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--red);letter-spacing:.1em;margin-bottom:8px;opacity:.75;}
+
+  /* ---------- Pricing ---------- */
+  .pricing{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-2);}
+  .receipt{max-width:380px;background:var(--paper);border:1px solid var(--line);padding:0;}
+  .receipt-head{padding:28px 32px;border-bottom:1px dashed var(--ink-faint);}
+  .receipt-head .amount{font-family:'Shippori Mincho',serif;font-size:44px;font-weight:600;}
+  .receipt-head .amount span{font-size:14px;color:var(--ink-faint);font-family:'Zen Kaku Gothic New',sans-serif;}
+  .receipt-body{padding:24px 32px;}
+  .receipt-row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-soft);padding:9px 0;font-family:'JetBrains Mono',monospace;}
+  .receipt-foot{padding:24px 32px;}
+  .plan-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;max-width:960px;align-items:start;}
+  @media (max-width:900px){.plan-grid{grid-template-columns:1fr;}}
+  .plan-label{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:10px;}
+  .receipt-highlight{border-color:var(--red);position:relative;box-shadow:0 14px 34px -20px rgba(178,58,46,.45);}
+  .plan-badge{position:absolute;top:-13px;left:32px;background:var(--red);color:var(--paper);font-size:11px;letter-spacing:.06em;padding:5px 12px;font-family:'JetBrains Mono',monospace;}
+  .plan-note{margin-top:22px;font-size:12.5px;color:var(--ink-faint);max-width:800px;}
+
+  /* ---------- FAQ ---------- */
+  details{border-top:1px solid var(--line);padding:20px 0;}
+  details:last-of-type{border-bottom:1px solid var(--line);}
+  summary{cursor:pointer;font-size:15px;font-weight:500;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"+";color:var(--red);font-size:18px;font-family:'JetBrains Mono',monospace;}
+  details[open] summary::after{content:"–";}
+  details p{color:var(--ink-soft);font-size:14px;margin-top:14px;max-width:600px;}
+
+  /* ---------- Legal ---------- */
+  .legal-note{font-size:12px;color:var(--red);background:var(--red-soft);border:1px solid rgba(178,58,46,.25);padding:14px 18px;margin-bottom:30px;}
+  .legal table{width:100%;border-collapse:collapse;font-size:13px;color:var(--ink-soft);}
+  .legal td{padding:13px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+  .legal td:first-child{width:170px;color:var(--ink);font-weight:500;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+
+  footer{padding:40px 0;text-align:center;font-size:12px;color:var(--ink-faint);border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">命星診断<span class="mark">AI</span></div>
+    <nav>
+      <a href="#how">つかい方</a>
+      <a href="#pricing">料金</a>
+      <a href="#faq">よくある質問</a>
+      <a href="#legal">特定商取引法</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">AI FORTUNE DIAGNOSIS ／ ¥100〜</span>
+      <h1>あなたの"今"を、<br><span class="accent">星が診断する。</span></h1>
+      <p class="lead">生年月日といま抱えていることを伝えてください。命星診断AIが星の巡りとあなたの言葉を照らし合わせ、ひとつの診断結果として言葉を返します。気になれば、その場で問い返せます。</p>
+      <div class="cta-row">
+        <a href="https://udify.app/chat/cOXUDSaamu1uiJKY" class="btn btn-primary">まずは無料で試す →</a>
+        <a href="#pricing" class="btn btn-ghost">料金を見る</a>
+      </div>
+      <p class="price-note">無料お試し後、続きが気になったら<span class="mono">¥100 / 回</span>の都度診断、または<span class="mono">¥390 / 月</span>の月額診断へ</p>
+    </div>
+
+    <div class="hero-chart">
+      <svg viewBox="0 0 480 480" width="100%">
+        <circle class="chart-ring" cx="240" cy="240" r="190"/>
+        <circle class="chart-ring-dash" cx="240" cy="240" r="150"/>
+        <circle class="chart-ring" cx="240" cy="240" r="4" fill="var(--ink)" opacity=".6"/>
+        <!-- degree ticks every 30deg -->
+        <g id="ticks"></g>
+        <!-- aspect lines -->
+        <line class="chart-aspect" x1="240" y1="50" x2="94" y2="335"/>
+        <line class="chart-aspect" x1="94" y1="335" x2="386" y2="335"/>
+        <line class="chart-aspect" x1="386" y1="335" x2="240" y2="50"/>
+        <line class="chart-aspect" x1="118" y1="120" x2="362" y2="360"/>
+        <circle class="chart-node" cx="240" cy="50" r="3.5"/>
+        <circle class="chart-node" cx="94" cy="335" r="3.5"/>
+        <circle class="chart-node" cx="386" cy="335" r="3.5"/>
+        <circle class="chart-node" cx="118" cy="120" r="3"/>
+        <circle class="chart-node" cx="362" cy="360" r="3"/>
+
+        <!-- hanko stamp: brand name 命星診断, 2x2, rotated -->
+        <g transform="translate(240,245) rotate(-7)">
+          <rect class="stamp-outer dup" x="-79" y="-79" width="162" height="162" transform="translate(2,2)"/>
+          <rect class="stamp-outer" x="-80" y="-80" width="160" height="160"/>
+          <rect class="stamp-inner" x="-68" y="-68" width="136" height="136"/>
+          <text class="stamp-kanji" x="-38" y="-14" font-size="40" text-anchor="middle">命</text>
+          <text class="stamp-kanji" x="38" y="-14" font-size="40" text-anchor="middle">星</text>
+          <text class="stamp-kanji" x="-38" y="46" font-size="40" text-anchor="middle">診</text>
+          <text class="stamp-kanji" x="38" y="46" font-size="40" text-anchor="middle">断</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Process</span>
+      <h2>診断の流れ</h2>
+      <p>問診票に答えるように、3つの手順で診断結果が届きます。</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="num">01 ／ 問診</span>
+        <div><h3>いまの状況を伝える</h3><p>生年月日と、恋愛・仕事・人間関係など、いま気になっていることを自由に入力します。</p></div>
+      </div>
+      <div class="step">
+        <span class="num">02 ／ 解析</span>
+        <div><h3>AIが星の巡りと照らし合わせる</h3><p>命星診断AIが、生まれた星の配置といまの言葉を重ね合わせ、状況を読み解きます。</p></div>
+      </div>
+      <div class="step">
+        <span class="num">03 ／ 診断</span>
+        <div><h3>結果が言葉になって届く</h3><p>その場で診断結果が届きます。気になる点があれば、続けて何度でも問い返せます。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="preview" id="preview">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Preview</span>
+      <h2 style="font-size:26px;font-weight:600;margin-bottom:20px;">問診票のように、<br>入力するだけ。</h2>
+      <p style="color:var(--ink-soft);font-size:14.5px;max-width:420px;margin-bottom:32px;">難しい設定は要りません。二つの項目に答えるだけで、AIが診断をはじめます。</p>
+      <div class="intake">
+        <div class="field"><label>生年月日 / DATE OF BIRTH</label>1998年3月2日</div>
+        <div class="field"><label>いまの相談 / CONCERN</label>今の仕事を続けるか迷っています。</div>
+      </div>
+    </div>
+    <div>
+      <div class="result-card">
+        <div class="id">DIAGNOSIS ID — 0302-A ／ 命星診断AI</div>
+        <div class="msg-user">「3月2日生まれです。今の仕事を続けるか迷っています。」</div>
+        <div class="msg-ai">
+          <div class="bar"></div>
+          <div>
+            <span class="tag">診断結果</span>
+            <p>魚座は現在、境界があいまいになる巡り。迷いそのものが、次の段階へ進む合図です。今週中に、小さな決断をひとつだけ下してください。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Pricing</span>
+      <h2>料金</h2>
+    </div>
+    <div class="plan-grid">
+      <div class="receipt">
+        <div class="receipt-head">
+          <span class="plan-label">無料お試し</span>
+          <div class="amount">¥0<span> / さわりのみ</span></div>
+        </div>
+        <div class="receipt-body">
+          <div class="receipt-row"><span>相談回数</span><span>制限なし</span></div>
+          <div class="receipt-row"><span>診断内容</span><span>ごく簡単な傾向のみ</span></div>
+          <div class="receipt-row"><span>契約</span><span>不要・登録不要</span></div>
+          <div class="receipt-row"><span>支払方法</span><span>なし</span></div>
+        </div>
+        <div class="receipt-foot">
+          <a href="https://udify.app/chat/cOXUDSaamu1uiJKY" class="btn btn-ghost" style="width:100%;justify-content:center;">無料で試す</a>
+        </div>
+      </div>
+
+      <div class="receipt">
+        <div class="receipt-head">
+          <span class="plan-label">都度診断</span>
+          <div class="amount">¥100<span> / 回</span></div>
+        </div>
+        <div class="receipt-body">
+          <div class="receipt-row"><span>相談回数</span><span>1回</span></div>
+          <div class="receipt-row"><span>診断項目</span><span>生年月日ベース</span></div>
+          <div class="receipt-row"><span>契約</span><span>不要・単発払い</span></div>
+          <div class="receipt-row"><span>支払方法</span><span>クレジットカード</span></div>
+        </div>
+        <div class="receipt-foot">
+          <a href="https://buy.stripe.com/9B6aEZ3XC0bu5a35s987K01" class="btn btn-ghost" style="width:100%;justify-content:center;">1回だけ診断する</a>
+        </div>
+      </div>
+
+      <div class="receipt receipt-highlight">
+        <span class="plan-badge">よく当たる人はこちら</span>
+        <div class="receipt-head">
+          <span class="plan-label">月額診断</span>
+          <div class="amount">¥390<span> / 月</span></div>
+        </div>
+        <div class="receipt-body">
+          <div class="receipt-row"><span>相談回数</span><span>無制限</span></div>
+          <div class="receipt-row"><span>診断項目</span><span>生年月日ベース</span></div>
+          <div class="receipt-row"><span>解約</span><span>いつでも可</span></div>
+          <div class="receipt-row"><span>支払方法</span><span>クレジットカード</span></div>
+        </div>
+        <div class="receipt-foot">
+          <a href="https://buy.stripe.com/9B64gB65K0bu0TN07P87K00" class="btn btn-primary" style="width:100%;justify-content:center;">月額ではじめる</a>
+        </div>
+      </div>
+    </div>
+    <p class="plan-note">まずは無料で試して、続きが気になったら都度診断か月額診断に進むのがおすすめです。</p>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap" style="max-width:740px;">
+    <div class="section-head">
+      <span class="eyebrow">FAQ</span>
+      <h2>よくある質問</h2>
+    </div>
+    <details open>
+      <summary>本当にAIが診断しているのですか？</summary>
+      <p>はい。生成AIが、入力いただいた生年月日と相談内容をもとに、その場で診断結果を作成しています。定型文ではありません。</p>
+    </details>
+    <details>
+      <summary>いつでも解約できますか？</summary>
+      <p>次回更新日の前までにお手続きいただければ、いつでも解約でき、以降の請求は発生しません。</p>
+    </details>
+    <details>
+      <summary>相談内容は保存されますか？</summary>
+      <p>サービス提供に必要な範囲で一時的に処理され、第三者への提供は行いません。詳しくはお申し込み前にご確認ください。</p>
+    </details>
+  </div>
+</section>
+
+<section class="legal" id="legal">
+  <div class="wrap" style="max-width:740px;">
+    <div class="section-head">
+      <span class="eyebrow">Legal</span>
+      <h2 style="font-size:22px;">特定商取引法に基づく表記</h2>
+    </div>
+    <div class="legal-note">ここはサンプルです。公開前に、実際の情報（事業者名・住所・連絡先など）に必ず書き換えてください。</div>
+    <table>
+      <tr><td>販売価格</td><td>都度診断：100円（税込）／ 月額診断：390円（税込）</td></tr>
+      <tr><td>お支払い方法</td><td>クレジットカード決済（自動更新）</td></tr>
+      <tr><td>お支払い時期</td><td>都度診断：注文完了時に都度決済／月額診断：ご登録日を起算日として毎月自動課金</td></tr>
+      <tr><td>提供時期</td><td>決済完了後、直ちにご利用いただけます</td></tr>
+      <tr><td>返品・解約</td><td>デジタルサービスの性質上、提供済みの診断分の返金は致しません。月額診断は、次回更新日前の解約手続きにより以降の請求は発生しません。</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer><div class="wrap">© 2026 命星診断AI. All rights reserved.</div></footer>
+
+<script>
+  // draw 12 degree ticks around the chart ring
+  const ns = "http://www.w3.org/2000/svg";
+  const g = document.getElementById("ticks");
+  const cx = 240, cy = 240, r1 = 190, r2 = 203;
+  for (let i = 0; i < 12; i++) {
+    const a = (Math.PI / 6) * i;
+    const x1 = cx + r1 * Math.cos(a), y1 = cy + r1 * Math.sin(a);
+    const x2 = cx + r2 * Math.cos(a), y2 = cy + r2 * Math.sin(a);
+    const line = document.createElementNS(ns, "line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+    line.setAttribute("class", "chart-tick");
+    g.appendChild(line);
+  }
+</script>
+</body>
+</html>
